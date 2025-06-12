@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Peminjaman dan Pengembalian Buku</title>
+    <style>
+        /* Styling untuk tampilan form */
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
+        .container { width: 500px; margin: 50px auto; padding: 20px; background-color: white; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+        h2 { text-align: center; }
+        label { display: block; margin: 10px 0 5px; }
+        input[type="text"], input[type="number"] { width: 100%; padding: 8px; margin: 5px 0 15px; border: 1px solid #ccc; border-radius: 4px; }
+        button { width: 100%; padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #45a049; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Peminjaman Buku</h2>
+    <form id="peminjamanForm">
+        <label for="namaPeminjam">Nama Peminjam</label>
+        <input type="text" id="namaPeminjam" required>
+
+        <label for="kodeBuku">Kode Buku</label>
+        <input type="text" id="kodeBuku" required>
+
+        <button type="submit">Pinjam Buku</button>
+    </form>
+
+    <h2>Pengembalian Buku</h2>
+    <form id="pengembalianForm">
+        <label for="namaPeminjamKembali">Nama Peminjam</label>
+        <input type="text" id="namaPeminjamKembali" required>
+
+        <label for="kodeBukuKembali">Kode Buku</label>
+        <input type="text" id="kodeBukuKembali" required>
+
+        <button type="submit">Kembalikan Buku</button>
+    </form>
+</div>
+
+<script>
+// Peminjaman Buku
+document.getElementById('peminjamanForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    var namaPeminjam = document.getElementById('namaPeminjam').value;
+    var kodeBuku = document.getElementById('kodeBuku').value;
+
+    fetch('URL_WEB_APP_ANDA', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            action: 'pinjam',  // atau 'kembali' untuk pengembalian buku
+            namaPeminjam: namaPeminjam,
+            kodeBuku: kodeBuku
+        })
+    })
+    .then(response => response.json())
+    .then(data => alert(data.result));
+});
+
+// Pengembalian Buku
+document.getElementById('pengembalianForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    var namaPeminjam = document.getElementById('namaPeminjamKembali').value;
+    var kodeBuku = document.getElementById('kodeBukuKembali').value;
+
+    fetch('URL_WEB_APP_ANDA', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            action: 'kembali', 
+            namaPeminjam: namaPeminjam, 
+            kodeBuku: kodeBuku 
+        })
+    })
+    .then(response => response.json())
+    .then(data => alert(data.result));
+});
+</script>
+
+</body>
+</html>
