@@ -6,13 +6,55 @@
     <title>Form Peminjaman dan Pengembalian Buku</title>
     <style>
         /* Styling untuk tampilan form */
-        body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
-        .container { width: 500px; margin: 50px auto; padding: 20px; background-color: white; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
-        h2 { text-align: center; }
-        label { display: block; margin: 10px 0 5px; }
-        input[type="text"], input[type="number"] { width: 100%; padding: 8px; margin: 5px 0 15px; border: 1px solid #ccc; border-radius: 4px; }
-        button { width: 100%; padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        button:hover { background-color: #45a049; }
+        body { 
+            font-family: Arial, sans-serif; 
+            background-color: #f4f4f4; 
+            margin: 0; 
+            padding: 0; 
+        }
+        .container { 
+            width: 500px; 
+            margin: 50px auto; 
+            padding: 20px; 
+            background-color: white; 
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); 
+            border-radius: 8px;
+        }
+        h2 { 
+            text-align: center; 
+        }
+        label { 
+            display: block; 
+            margin: 10px 0 5px; 
+        }
+        input[type="text"], input[type="number"], input[type="date"] { 
+            width: 100%; 
+            padding: 8px; 
+            margin: 5px 0 15px; 
+            border: 1px solid #ccc; 
+            border-radius: 4px; 
+        }
+        button { 
+            width: 100%; 
+            padding: 10px; 
+            background-color: #4CAF50; 
+            color: white; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+        }
+        button:hover { 
+            background-color: #45a049; 
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e7f7e7;
+            border: 1px solid #b5d8b5;
+            color: #4CAF50;
+            text-align: center;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -39,6 +81,8 @@
 
         <button type="submit">Kembalikan Buku</button>
     </form>
+
+    <div id="result" class="result" style="display: none;"></div>
 </div>
 
 <script>
@@ -46,20 +90,28 @@
 document.getElementById('peminjamanForm').addEventListener('submit', function(event) {
     event.preventDefault();
 
-    var namaPeminjam = document.getElementById('namaPeminjam').value;
-    var kodeBuku = document.getElementById('kodeBuku').value;
+    var namaPeminjam = document.getElementById('namaPeminjam').value; //make sure there is namaPeminjam in the form
+    var kodeBuku = document.getElementById('kodeBuku').value; 
 
-    fetch('URL_WEB_APP_ANDA', {
+    fetch('https://script.google.com/macros/s/AKfycbyJJOWN3s11H-lKR-Iacrp0Ie74CVDOoXnxlngDZ_avSMqpIgJc1mU25Oo3j2UVjw8p/exec', {  // URL Web App Anda
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            action: 'pinjam',  // atau 'kembali' untuk pengembalian buku
+            action: 'pinjam',  // Menentukan apakah itu peminjaman atau pengembalian buku
             namaPeminjam: namaPeminjam,
             kodeBuku: kodeBuku
         })
     })
-    .then(response => response.json())
-    .then(data => alert(data.result));
+    .then(response => response.json())  // Menerima respons dari Google Apps Script
+    .then(data => {
+        document.getElementById('result').innerText = data.result;  // Tampilkan hasil peminjaman/pengembalian
+        document.getElementById('result').style.display = 'block';  // Tampilkan pesan
+        document.getElementById('peminjamanForm').reset();  // Reset form setelah submit
+    })
+    .catch(error => {
+        console.error('Error:', error);  // Jika ada error
+        alert('Terjadi kesalahan. Coba lagi.');
+    });
 });
 
 // Pengembalian Buku
@@ -69,7 +121,7 @@ document.getElementById('pengembalianForm').addEventListener('submit', function(
     var namaPeminjam = document.getElementById('namaPeminjamKembali').value;
     var kodeBuku = document.getElementById('kodeBukuKembali').value;
 
-    fetch('URL_WEB_APP_ANDA', {
+    fetch('https://script.google.com/macros/s/AKfycbyJJOWN3s11H-lKR-Iacrp0Ie74CVDOoXnxlngDZ_avSMqpIgJc1mU25Oo3j2UVjw8p/exec', {  // URL Web App Anda
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -79,7 +131,15 @@ document.getElementById('pengembalianForm').addEventListener('submit', function(
         })
     })
     .then(response => response.json())
-    .then(data => alert(data.result));
+    .then(data => {
+        document.getElementById('result').innerText = data.result;
+        document.getElementById('result').style.display = 'block';
+        document.getElementById('pengembalianForm').reset();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan. Coba lagi.');
+    });
 });
 </script>
 
