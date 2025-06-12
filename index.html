@@ -1,147 +1,140 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Form Peminjaman dan Pengembalian Buku</title>
-    <style>
-        /* Styling untuk tampilan form */
-        body { 
-            font-family: Arial, sans-serif; 
-            background-color: #f4f4f4; 
-            margin: 0; 
-            padding: 0; 
-        }
-        .container { 
-            width: 500px; 
-            margin: 50px auto; 
-            padding: 20px; 
-            background-color: white; 
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); 
-            border-radius: 8px;
-        }
-        h2 { 
-            text-align: center; 
-        }
-        label { 
-            display: block; 
-            margin: 10px 0 5px; 
-        }
-        input[type="text"], input[type="number"], input[type="date"] { 
-            width: 100%; 
-            padding: 8px; 
-            margin: 5px 0 15px; 
-            border: 1px solid #ccc; 
-            border-radius: 4px; 
-        }
-        button { 
-            width: 100%; 
-            padding: 10px; 
-            background-color: #4CAF50; 
-            color: white; 
-            border: none; 
-            border-radius: 4px; 
-            cursor: pointer; 
-        }
-        button:hover { 
-            background-color: #45a049; 
-        }
-        .result {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #e7f7e7;
-            border: 1px solid #b5d8b5;
-            color: #4CAF50;
-            text-align: center;
-            font-weight: bold;
-        }
-    </style>
-</head>
-<body>
+    <!DOCTYPE html>
+    <html lang="id">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Sistem Inventaris Buku</title>
+        <style>
+            :root {
+                --primary-color: #0d6efd;
+                --background-color: #f8f9fa;
+                --font-color: #212529;
+                --border-color: #dee2e6;
+                --success-color: #198754;
+                --danger-color: #dc3545;
+            }
+            body { 
+                font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+                background-color: var(--background-color); 
+                color: var(--font-color);
+                margin: 0;
+                padding: 1rem;
+            }
+            .container { 
+                max-width: 800px; 
+                margin: 2rem auto; 
+                padding: 2rem; 
+                background-color: #fff; 
+                box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
+                border-radius: 8px; 
+            }
+            h1 { text-align: center; color: var(--primary-color); }
+            #message-bar {
+                text-align: center; padding: 1rem; margin-bottom: 1rem;
+                border-radius: 5px; display: none;
+            }
+            #message-bar.loading { background-color: #e2e3e5; }
+            #message-bar.success { background-color: #d1e7dd; color: #0f5132; }
+            #message-bar.error { background-color: #f8d7da; color: #842029; }
+            table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; }
+            th, td { padding: 12px 15px; border: 1px solid var(--border-color); text-align: left; vertical-align: middle; }
+            th { background-color: #f8f9fa; }
+            select { padding: 8px; border-radius: 5px; border: 1px solid #ced4da; width: 100%; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>📚 Sistem Inventaris Buku</h1>
+            <div id="message-bar"></div>
+            <div id="table-container"></div>
+        </div>
 
-<div class="container">
-    <h2>Peminjaman Buku</h2>
-    <form id="peminjamanForm">
-        <label for="namaPeminjam">Nama Peminjam</label>
-        <input type="text" id="namaPeminjam" required>
+        <script>
+            // --- PENTING! GANTI URL DI BAWAH INI ---
+            const API_URL = 'https://script.google.com/macros/s/AKfycbxz0H6Bu3xoQazRbdeTy77hsp-WEjfwC2oP4NON5MS6QQ6OZHZ-EbxSgYobshLUp0DRBg/exec';
 
-        <label for="kodeBuku">Kode Buku</label>
-        <input type="text" id="kodeBuku" required>
+            const messageBar = document.getElementById('message-bar');
+            const tableContainer = document.getElementById('table-container');
 
-        <button type="submit">Pinjam Buku</button>
-    </form>
+            // Fungsi untuk menampilkan pesan status
+            function showMessage(type, text) {
+                messageBar.className = type;
+                messageBar.textContent = text;
+                messageBar.style.display = 'block';
+            }
 
-    <h2>Pengembalian Buku</h2>
-    <form id="pengembalianForm">
-        <label for="namaPeminjamKembali">Nama Peminjam</label>
-        <input type="text" id="namaPeminjamKembali" required>
+            // 1. Ambil data buku saat halaman dimuat
+            document.addEventListener('DOMContentLoaded', () => {
+                showMessage('loading', 'Memuat data buku...');
+                fetch(API_URL)
+                    .then(response => response.json())
+                    .then(jsonResponse => {
+                        if (jsonResponse.result === 'success') {
+                            renderTable(jsonResponse.data);
+                            messageBar.style.display = 'none';
+                        } else {
+                            throw new Error(jsonResponse.message);
+                        }
+                    })
+                    .catch(error => {
+                        showMessage('error', 'Gagal memuat data: ' + error.message);
+                    });
+            });
 
-        <label for="kodeBukuKembali">Kode Buku</label>
-        <input type="text" id="kodeBukuKembali" required>
+            // 2. Fungsi untuk menampilkan data ke dalam tabel
+            function renderTable(books) {
+                if (books.length === 0) {
+                    showMessage('loading', 'Tidak ada data buku.');
+                    return;
+                }
+                let tableHTML = '<table><thead><tr><th>Kode Buku</th><th>Judul</th><th>Status</th></tr></thead><tbody>';
+                books.forEach(book => {
+                    tableHTML += `
+                        <tr>
+                            <td>${book.kode}</td>
+                            <td>${book.judul}</td>
+                            <td>
+                                <select onchange="updateStatus('${book.kode}', this.value)">
+                                    <option value="Tersedia" ${book.status === 'Tersedia' ? 'selected' : ''}>Tersedia</option>
+                                    <option value="Dipinjam" ${book.status === 'Dipinjam' ? 'selected' : ''}>Dipinjam</option>
+                                </select>
+                            </td>
+                        </tr>
+                    `;
+                });
+                tableHTML += '</tbody></table>';
+                tableContainer.innerHTML = tableHTML;
+            }
 
-        <button type="submit">Kembalikan Buku</button>
-    </form>
+            // 3. Fungsi untuk mengirim pembaruan status
+            function updateStatus(kodeBuku, newStatus) {
+                showMessage('loading', `Memperbarui status untuk ${kodeBuku}...`);
+                
+                const payload = {
+                    kodeBuku: kodeBuku,
+                    newStatus: newStatus
+                };
 
-    <div id="result" class="result" style="display: none;"></div>
-</div>
-
-<script>
-// Peminjaman Buku
-document.getElementById('peminjamanForm').addEventListener('submit', function(event) {
-    event.preventDefault();
-
-    var namaPeminjam = document.getElementById('namaPeminjam').value; //make sure there is namaPeminjam in the form
-    var kodeBuku = document.getElementById('kodeBuku').value; 
-
-    fetch('https://script.google.com/macros/s/AKfycbyJJOWN3s11H-lKR-Iacrp0Ie74CVDOoXnxlngDZ_avSMqpIgJc1mU25Oo3j2UVjw8p/exec', {  // URL Web App Anda
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            action: 'pinjam',  // Menentukan apakah itu peminjaman atau pengembalian buku
-            namaPeminjam: namaPeminjam,
-            kodeBuku: kodeBuku
-        })
-    })
-    .then(response => response.json())  // Menerima respons dari Google Apps Script
-    .then(data => {
-        document.getElementById('result').innerText = data.result;  // Tampilkan hasil peminjaman/pengembalian
-        document.getElementById('result').style.display = 'block';  // Tampilkan pesan
-        document.getElementById('peminjamanForm').reset();  // Reset form setelah submit
-    })
-    .catch(error => {
-        console.error('Error:', error);  // Jika ada error
-        alert('Terjadi kesalahan. Coba lagi.');
-    });
-});
-
-// Pengembalian Buku
-document.getElementById('pengembalianForm').addEventListener('submit', function(event) {
-    event.preventDefault();
-
-    var namaPeminjam = document.getElementById('namaPeminjamKembali').value;
-    var kodeBuku = document.getElementById('kodeBukuKembali').value;
-
-    fetch('https://script.google.com/macros/s/AKfycbyJJOWN3s11H-lKR-Iacrp0Ie74CVDOoXnxlngDZ_avSMqpIgJc1mU25Oo3j2UVjw8p/exec', {  // URL Web App Anda
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            action: 'kembali', 
-            namaPeminjam: namaPeminjam, 
-            kodeBuku: kodeBuku 
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        document.getElementById('result').innerText = data.result;
-        document.getElementById('result').style.display = 'block';
-        document.getElementById('pengembalianForm').reset();
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Terjadi kesalahan. Coba lagi.');
-    });
-});
-</script>
-
-</body>
-</html>
+                fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain;charset=utf-8', // Apps Script requires this header for simple POST
+                    },
+                    body: JSON.stringify(payload) 
+                })
+                .then(response => response.json())
+                .then(jsonResponse => {
+                    if (jsonResponse.result === 'success') {
+                        showMessage('success', jsonResponse.message);
+                    } else {
+                        throw new Error(jsonResponse.message);
+                    }
+                })
+                .catch(error => {
+                    showMessage('error', 'Gagal memperbarui: ' + error.message);
+                });
+            }
+        </script>
+    </body>
+    </html>
+    
